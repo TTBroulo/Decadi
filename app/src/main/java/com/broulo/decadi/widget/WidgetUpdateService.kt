@@ -11,11 +11,15 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.broulo.decadi.MainActivity
@@ -30,7 +34,23 @@ import kotlinx.coroutines.launch
 class WidgetUpdateService : Service() {
 
     private var job: Job? = null
+    private var receiverRegistered = false
     private val scope = CoroutineScope(Dispatchers.Default)
+
+    private val screenReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                Intent.ACTION_SCREEN_ON -> {
+                    Log.d(TAG, "Screen ON — resuming widget updates")
+                    startUpdating()
+                }
+                Intent.ACTION_SCREEN_OFF -> {
+                    Log.d(TAG, "Screen OFF — pausing widget updates")
+                    stopUpdating()
+                }
+            }
+        }
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -44,7 +64,20 @@ class WidgetUpdateService : Service() {
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
             else 0
         )
-        startUpdating()
+
+        if (!receiverRegistered) {
+            registerReceiver(screenReceiver, IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_ON)
+                addAction(Intent.ACTION_SCREEN_OFF)
+            })
+            receiverRegistered = true
+        }
+
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (pm.isInteractive) {
+            startUpdating()
+        }
+
         return START_STICKY
     }
 
@@ -59,8 +92,14 @@ class WidgetUpdateService : Service() {
         }
     }
 
+    private fun stopUpdating() {
+        job?.cancel()
+        job = null
+    }
+
     override fun onDestroy() {
         job?.cancel()
+        try { unregisterReceiver(screenReceiver) } catch (_: Exception) {}
         super.onDestroy()
     }
 
@@ -93,6 +132,7 @@ class WidgetUpdateService : Service() {
     }
 
     companion object {
+        private const val TAG = "WidgetUpdateService"
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "widget_updates"
 
