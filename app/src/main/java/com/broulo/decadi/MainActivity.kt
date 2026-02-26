@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,12 +26,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.broulo.decadi.data.AppSettings
+import com.broulo.decadi.data.ClockMode
 import com.broulo.decadi.data.SettingsRepository
 import com.broulo.decadi.model.DecimalTime
+import com.broulo.decadi.ui.clock.AnalogClock
 import com.broulo.decadi.ui.clock.DigitalClock
 import com.broulo.decadi.ui.settings.SettingsScreen
 import com.broulo.decadi.ui.theme.DecadiTheme
 import com.broulo.decadi.ui.theme.LocalClockTheme
+import com.broulo.decadi.widget.AnalogWidgetProvider
 import com.broulo.decadi.widget.ClockWidgetProvider
 import com.broulo.decadi.widget.WidgetUpdateService
 import kotlinx.coroutines.delay
@@ -92,9 +96,11 @@ fun ClockScreen(
         }
     }
 
-    // Restart widget service when settings change (theme, showSeconds)
+    // Restart widget service when settings change
     LaunchedEffect(settings.showSeconds, settings.theme) {
-        if (ClockWidgetProvider.hasActiveWidgets(context)) {
+        if (ClockWidgetProvider.hasActiveWidgets(context) ||
+            AnalogWidgetProvider.hasActiveWidgets(context)
+        ) {
             WidgetUpdateService.start(context)
         }
     }
@@ -104,12 +110,26 @@ fun ClockScreen(
             .fillMaxSize()
             .background(theme.background)
     ) {
-        DigitalClock(
-            time = time,
-            showSeconds = settings.showSeconds,
-            fontSize = settings.fontSizeSp.sp,
-            modifier = Modifier.align(Alignment.Center)
-        )
+        when (settings.clockMode) {
+            ClockMode.DIGITAL -> {
+                DigitalClock(
+                    time = time,
+                    showSeconds = settings.showSeconds,
+                    fontSize = settings.fontSizeSp.sp,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+            ClockMode.ANALOG -> {
+                AnalogClock(
+                    time = time,
+                    showSeconds = settings.showSeconds,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp)
+                        .align(Alignment.Center)
+                )
+            }
+        }
 
         Text(
             text = "\u2699",

@@ -6,9 +6,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.broulo.decadi.ui.theme.ClockTheme
 
+enum class ClockMode { DIGITAL, ANALOG }
+
 data class AppSettings(
     val showSeconds: Boolean = false,
     val fontSizeSp: Int = 96,
+    val clockMode: ClockMode = ClockMode.DIGITAL,
     val theme: ClockTheme = ClockTheme(
         background = Color(0xFF000000),
         primary = Color(0xFFFFFFFF),
@@ -26,6 +29,11 @@ class SettingsRepository(context: Context) {
         return AppSettings(
             showSeconds = prefs.getBoolean(KEY_SHOW_SECONDS, false),
             fontSizeSp = prefs.getInt(KEY_FONT_SIZE, 96),
+            clockMode = try {
+                ClockMode.valueOf(prefs.getString(KEY_CLOCK_MODE, ClockMode.DIGITAL.name)!!)
+            } catch (_: Exception) {
+                ClockMode.DIGITAL
+            },
             theme = ClockTheme(
                 background = Color(prefs.getInt(KEY_COLOR_BG, 0xFF000000.toInt())),
                 primary = Color(prefs.getInt(KEY_COLOR_PRIMARY, 0xFFFFFFFF.toInt())),
@@ -39,6 +47,7 @@ class SettingsRepository(context: Context) {
         prefs.edit()
             .putBoolean(KEY_SHOW_SECONDS, settings.showSeconds)
             .putInt(KEY_FONT_SIZE, settings.fontSizeSp)
+            .putString(KEY_CLOCK_MODE, settings.clockMode.name)
             .putInt(KEY_COLOR_BG, settings.theme.background.toArgb())
             .putInt(KEY_COLOR_PRIMARY, settings.theme.primary.toArgb())
             .putInt(KEY_COLOR_SECONDARY, settings.theme.secondary.toArgb())
@@ -50,6 +59,7 @@ class SettingsRepository(context: Context) {
         const val PREFS_NAME = "decadi_settings"
         const val KEY_SHOW_SECONDS = "show_seconds"
         const val KEY_FONT_SIZE = "font_size"
+        const val KEY_CLOCK_MODE = "clock_mode"
         const val KEY_COLOR_BG = "color_bg"
         const val KEY_COLOR_PRIMARY = "color_primary"
         const val KEY_COLOR_SECONDARY = "color_secondary"

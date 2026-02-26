@@ -47,6 +47,7 @@ class WidgetUpdateService : Service() {
         job = scope.launch {
             while (isActive) {
                 ClockWidgetProvider.updateWidgets(applicationContext)
+                AnalogWidgetProvider.updateWidgets(applicationContext)
                 delay(864L) // 1 decimal second = 0.864 standard seconds
             }
         }

@@ -51,6 +51,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.broulo.decadi.data.AppSettings
+import com.broulo.decadi.data.ClockMode
 import com.broulo.decadi.ui.theme.LocalClockTheme
 import kotlin.math.roundToInt
 
@@ -101,6 +102,48 @@ fun SettingsScreen(
 
         Spacer(Modifier.height(24.dp))
 
+        // Clock mode
+        SettingRow(label = "Mode d'affichage (inApp)") {
+            Row {
+                val isDigital = settings.clockMode == ClockMode.DIGITAL
+                Text(
+                    text = "Digital",
+                    color = if (isDigital) theme.accent else theme.secondary,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .clickable { onSettingsChanged(settings.copy(clockMode = ClockMode.DIGITAL)) }
+                        .padding(8.dp)
+                )
+                Text(
+                    text = "Cadran",
+                    color = if (!isDigital) theme.accent else theme.secondary,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .clickable { onSettingsChanged(settings.copy(clockMode = ClockMode.ANALOG)) }
+                        .padding(8.dp)
+                )
+            }
+        }
+
+
+        Spacer(Modifier.height(24.dp))
+
+        // Font size
+        SectionLabel("Taille de police (inApp) : ${settings.fontSizeSp} sp")
+        Slider(
+            value = settings.fontSizeSp.toFloat(),
+            onValueChange = {
+                onSettingsChanged(settings.copy(fontSizeSp = it.roundToInt()))
+            },
+            valueRange = 48f..144f,
+            steps = 0,
+            colors = sliderColors(),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+
+        Spacer(Modifier.height(24.dp))
+
         // Show seconds
         SettingRow(label = "Afficher les secondes") {
             Switch(
@@ -115,20 +158,6 @@ fun SettingsScreen(
             )
         }
 
-        Spacer(Modifier.height(24.dp))
-
-        // Font size
-        SectionLabel("Taille de police : ${settings.fontSizeSp} sp")
-        Slider(
-            value = settings.fontSizeSp.toFloat(),
-            onValueChange = {
-                onSettingsChanged(settings.copy(fontSizeSp = it.roundToInt()))
-            },
-            valueRange = 48f..144f,
-            steps = 0,
-            colors = sliderColors(),
-            modifier = Modifier.fillMaxWidth()
-        )
 
         Spacer(Modifier.height(24.dp))
 
@@ -137,7 +166,7 @@ fun SettingsScreen(
         Spacer(Modifier.height(12.dp))
 
         ColorSetting(
-            label = "Fond (background)",
+            label = "Fond",
             currentColor = settings.theme.background,
             showTransparent = true,
             onColorSelected = {
@@ -147,7 +176,7 @@ fun SettingsScreen(
         Spacer(Modifier.height(16.dp))
 
         ColorSetting(
-            label = "Principal (primary)",
+            label = "Principal",
             currentColor = settings.theme.primary,
             onColorSelected = {
                 onSettingsChanged(settings.copy(theme = settings.theme.copy(primary = it)))
@@ -156,7 +185,7 @@ fun SettingsScreen(
         Spacer(Modifier.height(16.dp))
 
         ColorSetting(
-            label = "Secondaire (secondary)",
+            label = "Secondaire",
             currentColor = settings.theme.secondary,
             onColorSelected = {
                 onSettingsChanged(settings.copy(theme = settings.theme.copy(secondary = it)))

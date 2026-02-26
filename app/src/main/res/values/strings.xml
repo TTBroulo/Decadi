@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Décadi</string>
     <string name="widget_description">Heure décimale révolutionnaire</string>
+    <string name="widget_analog_description">Cadran décimal révolutionnaire</string>
 </resources>

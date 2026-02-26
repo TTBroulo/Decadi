@@ -37,7 +37,9 @@ class ClockWidgetProvider : AppWidgetProvider() {
     }
 
     override fun onDisabled(context: Context) {
-        WidgetUpdateService.stop(context)
+        if (!AnalogWidgetProvider.hasActiveWidgets(context)) {
+            WidgetUpdateService.stop(context)
+        }
     }
 
     companion object {
