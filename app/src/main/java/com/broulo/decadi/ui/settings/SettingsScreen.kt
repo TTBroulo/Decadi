@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.sp
 import com.broulo.decadi.data.AppSettings
 import com.broulo.decadi.data.ClockMode
@@ -202,6 +203,35 @@ fun SettingsScreen(
         )
 
         Spacer(Modifier.height(48.dp))
+
+        // Developer credit
+        val uriHandler = LocalUriHandler.current
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Développé avec amour par",
+                color = theme.secondary.copy(alpha = 0.6f),
+                fontSize = 12.sp
+            )
+            Text(
+                text = "Théotime Dmitrašinović",
+                color = theme.secondary.copy(alpha = 0.6f),
+                fontSize = 12.sp
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "</> GitHub",
+                color = theme.accent.copy(alpha = 0.7f),
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .clickable { uriHandler.openUri("https://github.com/TTBroulo/Decadi") }
+                    .padding(4.dp)
+            )
+        }
+
+        Spacer(Modifier.height(24.dp))
     }
 }
 
