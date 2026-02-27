@@ -14,7 +14,8 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
             if (ClockWidgetProvider.hasActiveWidgets(context) ||
-                AnalogWidgetProvider.hasActiveWidgets(context)
+                AnalogWidgetProvider.hasActiveWidgets(context) ||
+                ProgressBarWidgetProvider.hasActiveWidgets(context)
             ) {
                 WidgetUpdateService.start(context)
             }

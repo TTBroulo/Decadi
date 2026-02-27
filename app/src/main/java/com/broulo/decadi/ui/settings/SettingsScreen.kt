@@ -112,23 +112,21 @@ fun SettingsScreen(
         // Clock mode
         SettingRow(label = "Mode d'affichage (inApp)") {
             Row {
-                val isDigital = settings.clockMode == ClockMode.DIGITAL
-                Text(
-                    text = "Digital",
-                    color = if (isDigital) theme.accent else theme.secondary,
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .clickable { onSettingsChanged(settings.copy(clockMode = ClockMode.DIGITAL)) }
-                        .padding(8.dp)
+                val modes = listOf(
+                    ClockMode.DIGITAL to "Digital",
+                    ClockMode.ANALOG to "Cadran",
+                    ClockMode.PROGRESS_BAR to "Barre"
                 )
-                Text(
-                    text = "Cadran",
-                    color = if (!isDigital) theme.accent else theme.secondary,
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .clickable { onSettingsChanged(settings.copy(clockMode = ClockMode.ANALOG)) }
-                        .padding(8.dp)
-                )
+                modes.forEach { (mode, label) ->
+                    Text(
+                        text = label,
+                        color = if (settings.clockMode == mode) theme.accent else theme.secondary,
+                        fontSize = 14.sp,
+                        modifier = Modifier
+                            .clickable { onSettingsChanged(settings.copy(clockMode = mode)) }
+                            .padding(8.dp)
+                    )
+                }
             }
         }
 

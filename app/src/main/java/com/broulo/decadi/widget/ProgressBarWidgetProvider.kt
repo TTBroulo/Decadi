@@ -21,11 +21,10 @@ import com.broulo.decadi.MainActivity
 import com.broulo.decadi.R
 import com.broulo.decadi.data.SettingsRepository
 import com.broulo.decadi.model.DecimalTime
-import com.broulo.decadi.ui.clock.AnalogClockRenderer
-import kotlin.math.min
+import com.broulo.decadi.ui.clock.ProgressBarRenderer
 import kotlin.math.roundToInt
 
-class AnalogWidgetProvider : AppWidgetProvider() {
+class ProgressBarWidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(
         context: Context,
@@ -47,7 +46,7 @@ class AnalogWidgetProvider : AppWidgetProvider() {
 
     override fun onDisabled(context: Context) {
         if (!ClockWidgetProvider.hasActiveWidgets(context) &&
-            !ProgressBarWidgetProvider.hasActiveWidgets(context)
+            !AnalogWidgetProvider.hasActiveWidgets(context)
         ) {
             WidgetUpdateService.stop(context)
         }
@@ -59,7 +58,7 @@ class AnalogWidgetProvider : AppWidgetProvider() {
             val time = DecimalTime.now()
             val manager = AppWidgetManager.getInstance(context)
             val ids = manager.getAppWidgetIds(
-                ComponentName(context, AnalogWidgetProvider::class.java)
+                ComponentName(context, ProgressBarWidgetProvider::class.java)
             )
 
             val density = context.resources.displayMetrics.density
@@ -72,18 +71,18 @@ class AnalogWidgetProvider : AppWidgetProvider() {
 
             for (id in ids) {
                 val options = manager.getAppWidgetOptions(id)
-                val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110)
-                val heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 110)
-                val sizeDp = min(widthDp, heightDp)
-                val sizePx = (sizeDp * density).roundToInt().coerceIn(100, 1000)
+                val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 250)
+                val heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 60)
+                val widthPx = (widthDp * density).roundToInt().coerceIn(200, 2000)
+                val heightPx = (heightDp * density).roundToInt().coerceIn(40, 400)
 
-                val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
+                val bitmap = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888)
                 val canvas = Canvas(bitmap)
 
-                AnalogClockRenderer.draw(
+                ProgressBarRenderer.draw(
                     canvas = canvas,
-                    width = sizePx.toFloat(),
-                    height = sizePx.toFloat(),
+                    width = widthPx.toFloat(),
+                    height = heightPx.toFloat(),
                     time = time,
                     bgColor = theme.background.toArgb(),
                     primaryColor = theme.primary.toArgb(),
@@ -92,9 +91,9 @@ class AnalogWidgetProvider : AppWidgetProvider() {
                     showSeconds = settings.showSeconds
                 )
 
-                val views = RemoteViews(context.packageName, R.layout.widget_analog)
-                views.setImageViewBitmap(R.id.widget_analog_image, bitmap)
-                views.setOnClickPendingIntent(R.id.widget_analog_root, pi)
+                val views = RemoteViews(context.packageName, R.layout.widget_progress)
+                views.setImageViewBitmap(R.id.widget_progress_image, bitmap)
+                views.setOnClickPendingIntent(R.id.widget_progress_root, pi)
                 manager.updateAppWidget(id, views)
             }
         }
@@ -102,7 +101,7 @@ class AnalogWidgetProvider : AppWidgetProvider() {
         fun hasActiveWidgets(context: Context): Boolean {
             val manager = AppWidgetManager.getInstance(context)
             val ids = manager.getAppWidgetIds(
-                ComponentName(context, AnalogWidgetProvider::class.java)
+                ComponentName(context, ProgressBarWidgetProvider::class.java)
             )
             return ids.isNotEmpty()
         }

@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.broulo.decadi.ui.theme.ClockTheme
 
-enum class ClockMode { DIGITAL, ANALOG }
+enum class ClockMode { DIGITAL, ANALOG, PROGRESS_BAR }
 
 data class AppSettings(
     val showSeconds: Boolean = false,
