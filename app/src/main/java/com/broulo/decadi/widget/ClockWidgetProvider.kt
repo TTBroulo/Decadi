@@ -44,7 +44,8 @@ class ClockWidgetProvider : AppWidgetProvider() {
 
     override fun onDisabled(context: Context) {
         if (!AnalogWidgetProvider.hasActiveWidgets(context) &&
-            !ProgressBarWidgetProvider.hasActiveWidgets(context)
+            !ProgressBarWidgetProvider.hasActiveWidgets(context) &&
+            !FractionWidgetProvider.hasActiveWidgets(context)
         ) {
             WidgetUpdateService.stop(context)
         }

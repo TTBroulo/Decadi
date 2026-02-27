@@ -3,4 +3,5 @@
     <string name="widget_description">Heure décimale révolutionnaire</string>
     <string name="widget_analog_description">Cadran décimal révolutionnaire</string>
     <string name="widget_progress_description">Barre de progression décimale</string>
+    <string name="widget_fraction_description">Fraction décimale de la journée</string>
 </resources>

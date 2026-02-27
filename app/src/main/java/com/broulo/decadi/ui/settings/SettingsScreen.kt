@@ -115,7 +115,8 @@ fun SettingsScreen(
                 val modes = listOf(
                     ClockMode.DIGITAL to "Digital",
                     ClockMode.ANALOG to "Cadran",
-                    ClockMode.PROGRESS_BAR to "Barre"
+                    ClockMode.PROGRESS_BAR to "Barre",
+                    ClockMode.FRACTION to "Fraction"
                 )
                 modes.forEach { (mode, label) ->
                     Text(

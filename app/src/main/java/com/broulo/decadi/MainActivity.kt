@@ -37,12 +37,14 @@ import com.broulo.decadi.data.SettingsRepository
 import com.broulo.decadi.model.DecimalTime
 import com.broulo.decadi.ui.clock.AnalogClock
 import com.broulo.decadi.ui.clock.DigitalClock
+import com.broulo.decadi.ui.clock.FractionClock
 import com.broulo.decadi.ui.clock.ProgressBarClock
 import com.broulo.decadi.ui.settings.SettingsScreen
 import com.broulo.decadi.ui.theme.DecadiTheme
 import com.broulo.decadi.ui.theme.LocalClockTheme
 import com.broulo.decadi.widget.AnalogWidgetProvider
 import com.broulo.decadi.widget.ClockWidgetProvider
+import com.broulo.decadi.widget.FractionWidgetProvider
 import com.broulo.decadi.widget.ProgressBarWidgetProvider
 import com.broulo.decadi.widget.WidgetUpdateService
 import kotlinx.coroutines.delay
@@ -108,7 +110,8 @@ fun ClockScreen(
     LaunchedEffect(settings.showSeconds, settings.theme) {
         if (ClockWidgetProvider.hasActiveWidgets(context) ||
             AnalogWidgetProvider.hasActiveWidgets(context) ||
-            ProgressBarWidgetProvider.hasActiveWidgets(context)
+            ProgressBarWidgetProvider.hasActiveWidgets(context) ||
+            FractionWidgetProvider.hasActiveWidgets(context)
         ) {
             WidgetUpdateService.start(context)
         }
@@ -146,6 +149,14 @@ fun ClockScreen(
                         .fillMaxWidth()
                         .padding(24.dp)
                         .align(Alignment.Center)
+                )
+            }
+            ClockMode.FRACTION -> {
+                FractionClock(
+                    time = time,
+                    showSeconds = settings.showSeconds,
+                    fontSize = settings.fontSizeSp.sp,
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
         }

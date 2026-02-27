@@ -88,6 +88,7 @@ class WidgetUpdateService : Service() {
                 ClockWidgetProvider.updateWidgets(applicationContext)
                 AnalogWidgetProvider.updateWidgets(applicationContext)
                 ProgressBarWidgetProvider.updateWidgets(applicationContext)
+                FractionWidgetProvider.updateWidgets(applicationContext)
                 delay(864L) // 1 decimal second = 0.864 standard seconds
             }
         }

@@ -12,19 +12,16 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.os.Bundle
+import android.util.TypedValue
 import android.widget.RemoteViews
 import androidx.compose.ui.graphics.toArgb
 import com.broulo.decadi.MainActivity
 import com.broulo.decadi.R
 import com.broulo.decadi.data.SettingsRepository
 import com.broulo.decadi.model.DecimalTime
-import com.broulo.decadi.ui.clock.ProgressBarRenderer
-import kotlin.math.roundToInt
 
-class ProgressBarWidgetProvider : AppWidgetProvider() {
+class FractionWidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(
         context: Context,
@@ -47,7 +44,7 @@ class ProgressBarWidgetProvider : AppWidgetProvider() {
     override fun onDisabled(context: Context) {
         if (!ClockWidgetProvider.hasActiveWidgets(context) &&
             !AnalogWidgetProvider.hasActiveWidgets(context) &&
-            !FractionWidgetProvider.hasActiveWidgets(context)
+            !ProgressBarWidgetProvider.hasActiveWidgets(context)
         ) {
             WidgetUpdateService.stop(context)
         }
@@ -59,10 +56,9 @@ class ProgressBarWidgetProvider : AppWidgetProvider() {
             val time = DecimalTime.now()
             val manager = AppWidgetManager.getInstance(context)
             val ids = manager.getAppWidgetIds(
-                ComponentName(context, ProgressBarWidgetProvider::class.java)
+                ComponentName(context, FractionWidgetProvider::class.java)
             )
 
-            val density = context.resources.displayMetrics.density
             val theme = settings.theme
             val openIntent = Intent(context, MainActivity::class.java)
             val pi = PendingIntent.getActivity(
@@ -70,31 +66,38 @@ class ProgressBarWidgetProvider : AppWidgetProvider() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
+            val totalDecimalSeconds = time.hour * 10000 + time.minute * 100 + time.second
+            val digits = if (settings.showSeconds) {
+                String.format("%05d", totalDecimalSeconds)
+            } else {
+                String.format("%03d", totalDecimalSeconds / 100)
+            }
+
             for (id in ids) {
                 val options = manager.getAppWidgetOptions(id)
-                val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 250)
                 val heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 60)
-                val widthPx = (widthDp * density).roundToInt().coerceIn(200, 2000)
-                val heightPx = (heightDp * density).roundToInt().coerceIn(40, 400)
+                val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110)
 
-                val bitmap = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888)
-                val canvas = Canvas(bitmap)
+                // charSlots: "0." prefix counts as ~1.5, digits are 5 or 3
+                val charSlots = if (settings.showSeconds) 6.5f else 4.5f
+                val sizeFromHeight = heightDp * 0.9f
+                val sizeFromWidth = widthDp / charSlots
+                val mainSizeSp = minOf(sizeFromHeight, sizeFromWidth).coerceIn(14f, 200f)
+                val prefixSizeSp = (mainSizeSp * 0.55f).coerceIn(10f, 110f)
 
-                ProgressBarRenderer.draw(
-                    canvas = canvas,
-                    width = widthPx.toFloat(),
-                    height = heightPx.toFloat(),
-                    time = time,
-                    bgColor = theme.background.toArgb(),
-                    primaryColor = theme.primary.toArgb(),
-                    secondaryColor = theme.secondary.toArgb(),
-                    accentColor = theme.accent.toArgb(),
-                    showSeconds = settings.showSeconds
-                )
+                val views = RemoteViews(context.packageName, R.layout.widget_fraction)
 
-                val views = RemoteViews(context.packageName, R.layout.widget_progress)
-                views.setImageViewBitmap(R.id.widget_progress_image, bitmap)
-                views.setOnClickPendingIntent(R.id.widget_progress_root, pi)
+                views.setTextViewText(R.id.widget_fraction_prefix, "0.")
+                views.setTextViewText(R.id.widget_fraction_digits, digits)
+
+                views.setTextViewTextSize(R.id.widget_fraction_prefix, TypedValue.COMPLEX_UNIT_SP, prefixSizeSp)
+                views.setTextViewTextSize(R.id.widget_fraction_digits, TypedValue.COMPLEX_UNIT_SP, mainSizeSp)
+
+                views.setInt(R.id.widget_fraction_root, "setBackgroundColor", theme.background.toArgb())
+                views.setTextColor(R.id.widget_fraction_prefix, theme.secondary.toArgb())
+                views.setTextColor(R.id.widget_fraction_digits, theme.primary.toArgb())
+
+                views.setOnClickPendingIntent(R.id.widget_fraction_root, pi)
                 manager.updateAppWidget(id, views)
             }
         }
@@ -102,7 +105,7 @@ class ProgressBarWidgetProvider : AppWidgetProvider() {
         fun hasActiveWidgets(context: Context): Boolean {
             val manager = AppWidgetManager.getInstance(context)
             val ids = manager.getAppWidgetIds(
-                ComponentName(context, ProgressBarWidgetProvider::class.java)
+                ComponentName(context, FractionWidgetProvider::class.java)
             )
             return ids.isNotEmpty()
         }
